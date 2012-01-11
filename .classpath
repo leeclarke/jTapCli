@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/easymock-2.5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,3 +1,7 @@
+/**
+ * License: This is free do what ya want with it! Or to be more specific for all you lawyers out there... I put this into the public domain. 
+ * Note: Any License which applies to any of the libraries used in the application retain their respective licensing agreements including but, not limited to the jTap utility.
+ */
 package lee.util.jtap.model;
 
 import java.io.File;
@@ -15,11 +19,13 @@ import java.io.Serializable;
 public class JTapSession implements Serializable{
     private static final long serialVersionUID = -4089631251207710335L;
     private static final String SAVE_FILE = "jtap-session.ser";
+    public static final int DEFAULT_PORT = 11210;
+    public static final String DEFAULT_DUMP_FILE = "dump.txt";
     private String host;
     private int port;
     private String password;
     private String bucket;
-    
+    private String fileDumpName = DEFAULT_DUMP_FILE;
     
     /**
      * Default constructor.
@@ -41,7 +47,16 @@ public class JTapSession implements Serializable{
         this.password = password;
     }
     
-    
+    /**
+     * Convenience constructor, will work on dev env where use took defaults and no password.
+     * @param host
+     * @param bucket
+     */
+    public JTapSession(String host, String bucket) {
+        this.host = host;
+        this.bucket = bucket;
+    }
+
     /**
      * Saves the contents to a file for later reuse.
      */
@@ -82,8 +97,9 @@ public class JTapSession implements Serializable{
     
     /**
      * Deletes the save location.
+     * @return - success
      */
-    public void delete(){
+    public boolean delete(){
         File serFile = new File(SAVE_FILE);
         try{
             if(serFile.exists()){
@@ -91,7 +107,9 @@ public class JTapSession implements Serializable{
             }
         }catch(RuntimeException re){
             re.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public String getHost() {
@@ -124,5 +142,13 @@ public class JTapSession implements Serializable{
 
     public void setBucket(String bucket) {
         this.bucket = bucket;
+    }
+
+    public String getFileDumpName() {
+        return this.fileDumpName;
+    }
+
+    public void setFileDumpName(String fileDumpName) {
+        this.fileDumpName = fileDumpName;
     }
 }
