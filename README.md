@@ -1,7 +1,9 @@
 # jTapCLI
 
 ##OVERVIEW
-This is a quick Command Line interface that I threw together for jTap the Java Membase Tap interface. All credit for jTap goes to mikewied and you can get updated version of the jTap source code [right here|https://github.com/mikewied/jtap].
+This is a quick Command Line interface that I threw together for jTap the Java Membase Tap interface. All credit for jTap goes to mikewied and you can get updated version of the [jTap source code](https://github.com/mikewied/jtap).
+
+Don't want to pull code and build this? Check out the [Downloads](https://github.com/leeclarke/jTapCli/downloads) for a zip of the Distro.
 
 ```
 usage: jtapc
