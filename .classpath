@@ -14,5 +14,10 @@
 	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/easymock-2.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/spymemcached-2.7.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Documents and Settings/lclark/My Documents/Downloads/spymemcached-2.7.3-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

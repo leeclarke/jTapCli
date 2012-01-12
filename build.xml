@@ -1,46 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-   <project name="jtap" default="compile" basedir=".">
-   
-    <property name="src.dir"     value="src"/>
-    <property name="lib.dir"     value="lib"/>
-    <property name="doc.dir"     value="doc"/>
+<project name="jtapcli" default="compile" basedir=".">
 
-    <property name="build.dir"   value="build"/>
-    <property name="classes.dir" value="${build.dir}/classes"/>
-    <property name="jar.dir"     value="${build.dir}/jar"/>
+	<property name="src.dir"     value="src"/>
+	<property name="lib.dir"     value="lib"/>
+	<property name="doc.dir"     value="doc"/>
+	<property name="dist.dir"    value="dist"/>
+	<property name="dist.lib.dir" value="${dist.dir}/lib"/>
 
-    <path id="build.classpath">
-        <fileset dir="${lib.dir}">
-          <include name="**/*.jar" />
-        </fileset>
-    </path>
-   
-    <target name="compile">
-        <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="build.classpath" deprecation="on" includeantruntime="false">
-          <compilerarg value="-Xlint:unchecked"/>
-        </javac>
-        <antcall target="makejar"/>
-    </target>
+	<property name="build.dir"   value="build"/>
+	<property name="classes.dir" value="${build.dir}/classes"/>
+	<property name="classes.dir" value="${build.dir}/lib"/>
+	<property name="jar.dir"     value="${build.dir}/jar"/>
+	<property name="manifest.main.class" value="lee.util.jtap.JTapCli"/>
+	<property name="manifest.built.by"   value="Lee Clarke"/>
+	<property name="version.number"      value="1"/>
+	<property name="build.number"        value="2"/>
+	<tstamp/>
+	
+	<path id="build.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
 
-    <target name ="makejar" description="Create a jar for the jtap project">
-      <jar jarfile="build/jtap.jar" includes="**/*.class" basedir="${classes.dir}"/>
-    </target>
+	<path id="dist.classpath">
+		<fileset dir="${dist.lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
 
-    <target name="clean">
-       <delete includeemptydirs="true">
-          <fileset dir="build" includes="**/*"/>
-       </delete>
-       <delete dir="${build.dir}"/>
-    </target>
+	
 
-   <target name="doc">
-      <javadoc destdir="${doc.dir}/javadoc" packagenames="com.yahoo.ycsb,com.yahoo.ycsb.workloads,com.yahoo.ycsb.db,com.yahoo.ycsb.generator,com.yahoo.ycsb.measurements"> 
-         <fileset dir="." defaultexcludes="yes">
-           <include name="src/**"/>
-           <include name="db/**/src/**"/>
-         </fileset>
-      </javadoc>
-   </target>
+	<target name="compile">
+		<mkdir dir="${classes.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="build.classpath" deprecation="on" includeantruntime="false">
+			<compilerarg value="-Xlint:unchecked"/>
+		</javac>
+		<antcall target="makejar"/>
+	</target>
+
+	<target name ="makejar" description="Create a jar for the jTapCli project">
+		<!-- convert build.classpath to mf.classpath (the string needed for the manifest task) -->
+	    <pathconvert property="mf.classpath" pathsep=";">
+	        <path refid="dist.classpath" />
+	        <flattenmapper />
+	    </pathconvert>
+		<jar jarfile="build/jTapCli.jar" includes="**/*.class **/*.jar" basedir="${classes.dir}">
+			<!-- now build the manifest file, using mf.classpath -->
+			    <!-- needed for TODAY -->
+			    <manifest>
+			        <attribute name="Built-By" value="${manifest.built.by}"/>
+			        <attribute name="Created-By" value="${manifest.built.by}"/>
+			        <attribute name="Main-Class" value="${manifest.main.class}"/>
+			        <attribute name="Implementation-Version" value="${version.number}-b${build.number}"/>
+			        <attribute name="Built-Date" value="${TODAY}"/>
+			        <attribute name="Class-Path" value="${mf.classpath}" />
+			    </manifest>
+		</jar>
+		
+	</target>
+
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="build" includes="**/*"/>
+		</delete>
+		<delete dir="${build.dir}"/>
+	</target>
+
+	<target name="prepdist">
+		<delete includeemptydirs="true">
+			<fileset dir="${dist.dir}" includes="**/*"/>
+		</delete>
+		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${dist.lib.dir}"/>
+		<copy todir="${dist.lib.dir}">
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="dist" depends="prepdist,clean,compile">
+		<copy file="jtapc.bat" tofile="${dist.dir}/jtapc.bat"/>
+		<copy file="build/jTapCli.jar" tofile="${dist.dir}/jTapCli.jar"/>
+	</target>
+
+	<target name="doc">
+		<javadoc destdir="${doc.dir}/javadoc" packagenames="com.yahoo.ycsb,com.yahoo.ycsb.workloads,com.yahoo.ycsb.db,com.yahoo.ycsb.generator,com.yahoo.ycsb.measurements">
+			<fileset dir="." defaultexcludes="yes">
+				<include name="src/**"/>
+				<include name="db/**/src/**"/>
+			</fileset>
+		</javadoc>
+	</target>
 </project>
 

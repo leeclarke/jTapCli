@@ -4,9 +4,17 @@
  */
 package lee.util.jtap;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import lee.util.jtap.model.JTapSession;
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.ConnectionFactoryBuilder;
+import net.spy.memcached.ConnectionFactoryBuilder.Protocol;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.auth.AuthDescriptor;
+import net.spy.memcached.auth.PlainCallbackHandler;
+import net.spy.memcached.internal.OperationFuture;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -34,10 +42,7 @@ public class JTapCli {
      */
     protected static String dumpKeys() {
         TapStreamClient client;
-        JTapCli.session = JTapSession.load();
-        if (JTapCli.session == null) {
-            JTapCli.session = new JTapSession("localhost", "default");
-        }
+        loadSession();
         client = new TapStreamClient(JTapCli.session.getHost(), JTapCli.session.getPort(), JTapCli.session.getBucket(), JTapCli.session.getPassword());
         Exporter exporter = new FileExporter(JTapCli.session.getFileDumpName());
         CustomStream tapListener = new CustomStream(exporter, JTapCli.session.getHost());
@@ -45,6 +50,61 @@ public class JTapCli {
         tapListener.doDump();
         client.start(tapListener);
         return "Key Dump results written to file > " + JTapCli.session.getFileDumpName();
+    }
+    
+    protected static String deleteKey(String... keys) {
+        String responseMessage = "Key deleted."; 
+        loadSession();
+        if(keys.length >0){
+            MemcachedClient memcachedClient = connectToMembase();
+            OperationFuture<Boolean> result = memcachedClient.delete(keys[0]);
+            System.out.println("Delete result:" + result.getStatus() + " is done:"+result.isDone());
+            
+        } else{
+            responseMessage = "No keys found.";
+        }
+        return responseMessage;
+    }
+    
+    
+    
+    protected static String dumpKey(String... keys) {
+        String responseMessage = "Key dumped."; 
+        loadSession();
+        if(keys.length >0){
+            MemcachedClient memcachedClient = connectToMembase();
+            Object object = memcachedClient.get(keys[0]);
+            responseMessage = object.toString();
+        } else{
+            responseMessage = "Key not found.";
+        }
+        return responseMessage;
+    }
+    
+    
+    private static MemcachedClient connectToMembase() {
+        MemcachedClient memcachedClient = null;
+        try {
+            if (JTapCli.session.getHost() != null && JTapCli.session.getBucket() != null) {
+                AuthDescriptor ad = new AuthDescriptor(new String[]{"PLAIN"},
+                        new PlainCallbackHandler(JTapCli.session.getBucket(), JTapCli.session.getPassword()));
+                memcachedClient = new MemcachedClient(
+                        new ConnectionFactoryBuilder().setProtocol(Protocol.BINARY)
+                        .setAuthDescriptor(ad)
+                        .build(),
+                        AddrUtil.getAddresses(JTapCli.session.getHost()+":"+JTapCli.session.getPort()));
+            } 
+        } catch (IOException ex) {
+            System.err.println("Couldn't create a connection, bailing out: \nIOException " + ex.getMessage());
+        }
+        return memcachedClient;
+    }
+
+    private static void loadSession(){
+        JTapCli.session = JTapSession.load();
+        if (JTapCli.session == null) {
+            JTapCli.session = new JTapSession("localhost", "default");
+        }
     }
     
     /**
@@ -118,7 +178,13 @@ public class JTapCli {
         }
         else if(cmd.hasOption("s") || cmd.hasOption("session")) {
             HashMap<String, String> argsMap = getMappedArgs(cmd, "host","bucket","password","port");
-            resultMessage = ">> "+JTapCli.setSession(argsMap);
+            resultMessage = ">> " + JTapCli.setSession(argsMap);
+        }
+        else if(cmd.hasOption("dk") || cmd.hasOption("deletekey")) {
+            resultMessage = JTapCli.deleteKey(cmd.getOptionValues("dk"));
+        }
+        else if(cmd.hasOption("gk") || cmd.hasOption("getkey")) {
+            resultMessage = JTapCli.dumpKey(cmd.getOptionValues("gk"));
         }
         else if(cmd.hasOption("cs") || cmd.hasOption("clearsession")) {
             boolean removed = JTapCli.session.delete();
@@ -150,12 +216,19 @@ public class JTapCli {
         options.addOption("dumpkeys",false, "Dumps keys for the specified bucket");
         options.addOption("dumpall",false, "Dumps keys and values for the specified bucket");
         
-        Option session = OptionBuilder.withArgName("host,bucket,[port]").hasArg().withDescription(  "host address of membase server, bucket name and optional port if not default." ).create( "s" );
+        Option session = OptionBuilder.withArgName("host,bucket,[port]").hasArg().withDescription("host address of membase server, bucket name and optional port if not default.").create("s");
         session.setLongOpt("session");
         session.setValueSeparator(',');
         session.setArgs(3);
-        
         options.addOption(session);
+        
+        Option deleteKey = OptionBuilder.withArgName("key").hasArg().withDescription("key to be deleted.").create("dk");
+        deleteKey.setLongOpt("deletekey");
+        options.addOption(deleteKey);
+        
+        Option getKey = OptionBuilder.withArgName("key").hasArg().withDescription("key to be retrieved.").create("gk");
+        getKey.setLongOpt("getkey");
+        options.addOption(getKey);
         options.addOption("cs","clearsession",false, "Clear session info from drive.");
         return options;
     }

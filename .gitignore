@@ -1,0 +1,17 @@
+# Compiled source #
+###################
+*.class
+
+
+# Misc Files #
+###################
+*.ser
+dump.txt
+MANIFEST.MF
+
+
+# Build Dirs      #
+###################
+bin/
+build/
+dist/
