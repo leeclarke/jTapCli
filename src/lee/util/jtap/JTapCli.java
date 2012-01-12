@@ -216,10 +216,10 @@ public class JTapCli {
         options.addOption("dumpkeys",false, "Dumps keys for the specified bucket");
         options.addOption("dumpall",false, "Dumps keys and values for the specified bucket");
         
-        Option session = OptionBuilder.withArgName("host,bucket,[port]").hasArg().withDescription("host address of membase server, bucket name and optional port if not default.").create("s");
+        Option session = OptionBuilder.withArgName("host,bucket,[password,port]").hasArg().withDescription("host address of membase server, bucket name and optional port if not default.").create("s");
         session.setLongOpt("session");
         session.setValueSeparator(',');
-        session.setArgs(3);
+        session.setArgs(4);
         options.addOption(session);
         
         Option deleteKey = OptionBuilder.withArgName("key").hasArg().withDescription("key to be deleted.").create("dk");
