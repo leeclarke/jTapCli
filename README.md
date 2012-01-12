@@ -3,7 +3,7 @@
 ##OVERVIEW
 This is a quick Command Line interface that I threw together for jTap the Java Membase Tap interface. All credit for jTap goes to mikewied and you can get updated version of the jTap source code [right here|https://github.com/mikewied/jtap].
 
-'''
+```
 usage: jtapc
  -cs,--clearsession                           Clear session info from
                                               drive.
@@ -19,6 +19,6 @@ usage: jtapc
                                               server, bucket name and
                                               optional port if not
                                               default.
-'''
+```
 
  
